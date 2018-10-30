@@ -10,8 +10,17 @@ class Category(models.Model):
 
 class Ingredient(models.Model):
     name = models.CharField(max_length=100)
-    notes = models.TextField()
+    notes = models.TextField(null=True)
     category = models.ForeignKey(Category, related_name='ingredients', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
+
+class Recipe(models.Model):
+    name = models.CharField(max_length=100)
+    instructions = models.TextField(null=True)
+    ingredients = models.ManyToManyField(Ingredient, related_name='recipes')
 
     def __str__(self):
         return self.name
