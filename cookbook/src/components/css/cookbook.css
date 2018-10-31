@@ -1,0 +1,17 @@
+.flip-switch-container{
+    overflow: hidden;
+    padding: 0;
+    margin: 5px 0;
+}
+
+.flip-switch{
+    position: relative;
+    width: 200%;
+}
+
+.flip-switch-segment{
+    display: inline-block;
+    padding: 10px 10px;
+    text-align: left;
+    width: 50%;
+}

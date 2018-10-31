@@ -29,7 +29,8 @@
     "prop-types": "^15.6.2",
     "react": "^16.5.2",
     "react-dom": "^16.5.2",
-    "react-spring": "^6.0.0"
+    "react-relay": "^1.7.0",
+    "react-spring": "^6.1.5"
   },
   "devDependencies": {
     "@fortawesome/fontawesome-pro": "^5.4.1",
