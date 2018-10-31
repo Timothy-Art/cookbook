@@ -1,106 +1,138 @@
+import django_filters
 import graphene
-import graphene_django
 
+from graphene_django import DjangoObjectType
+from graphene_django.filter import DjangoFilterConnectionField
 from ingredients import models
 
 
-class CategoryType(graphene_django.DjangoObjectType):
+class CategoryFilter(django_filters.FilterSet):
     class Meta:
         model = models.Category
+        fields = ['name', 'id', ]
 
 
-class IngredientType(graphene_django.DjangoObjectType):
+class CategoryType(DjangoObjectType):
+    class Meta:
+        model = models.Category
+        interfaces = (graphene.relay.Node, )
+
+
+class IngredientFilter(django_filters.FilterSet):
     class Meta:
         model = models.Ingredient
+        fields = {
+            'name': ['exact', 'in'],
+            'category__name': ['exact', 'in'],
+            'id': ['exact'],
+        }
 
 
-class RecipeType(graphene_django.DjangoObjectType):
+class IngredientType(DjangoObjectType):
+    class Meta:
+        model = models.Ingredient
+        interfaces = (graphene.relay.Node, )
+
+
+class RecipeFilter(django_filters.FilterSet):
     class Meta:
         model = models.Recipe
+        fields = {
+            'name': ['exact', 'istartswith', 'in'],
+            'ingredients': ['exact'],
+            'ingredients__name': ['exact', 'in'],
+            'id': ['exact'],
+        }
 
 
-class CreateIngredient(graphene.Mutation):
+class RecipeType(DjangoObjectType):
+    class Meta:
+        model = models.Recipe
+        interfaces = (graphene.relay.Node, )
+
+
+class CreateIngredient(graphene.relay.ClientIDMutation):
     ingredient = graphene.Field(IngredientType)
 
-    class Arguments:
-        name = graphene.String()
-        category = graphene.String()
+    class Input:
+        name = graphene.String(required=True)
+        category = graphene.String(required=True)
         notes = graphene.String(required=False)
 
-    def mutate(self, info, name, category, notes=None):
-        ingredient = models.Ingredient(name=name, category=models.Category.objects.get(name=category), notes=notes)
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, **input):
+        notes = input.get('notes')
+
+        ingredient = models.Ingredient(
+            name=input['name'],
+            category=models.Category.objects.get(name=input['category']),
+            notes=notes
+        )
         ingredient.save()
 
         return CreateIngredient(ingredient=ingredient)
 
 
-class CreateRecipe(graphene.Mutation):
+class DeleteIngredient(graphene.relay.ClientIDMutation):
+    ingredient = graphene.Field(IngredientType)
+
+    class Input:
+        id = graphene.ID(required=True)
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, **input):
+        ingredient = models.Ingredient.objects.get(pk=input['id'])
+        ingredient.delete()
+
+        return DeleteIngredient(ingredient=ingredient)
+
+
+class CreateRecipe(graphene.relay.ClientIDMutation):
     recipe = graphene.Field(RecipeType)
 
-    class Arguments:
-        name = graphene.String()
-        instructions = graphene.String()
-        ingredients = graphene.List(graphene.String)
+    class Input:
+        name = graphene.String(required=True)
+        instructions = graphene.String(required=True)
+        ingredients = graphene.List(graphene.String, required=False)
 
-    def mutate(self, info, name, instructions, ingredients):
-        recipe = models.Recipe(name=name, instructions=instructions)
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, **input):
+        recipe = models.Recipe(name=input['name'], instructions=input['instructions'])
         recipe.save()
-        for ingredient in ingredients:
+        for ingredient in input['ingredients']:
             recipe.ingredients.add(models.Ingredient.objects.get(name=ingredient))
 
         return CreateRecipe(recipe=recipe)
 
 
+class DeleteRecipe(graphene.relay.ClientIDMutation):
+    recipe = graphene.Field(RecipeType)
+
+    class Input:
+        id = graphene.ID(required=True)
+
+    @classmethod
+    def mutate(cls, root, info, **input):
+        recipe = models.Recipe.objects.get(pk=input['id'])
+        recipe.delete()
+
+        return DeleteRecipe(recipe=recipe)
+
+
 class Mutation(graphene.ObjectType):
     create_ingredient = CreateIngredient.Field()
+    delete_ingredient = DeleteIngredient.Field()
     create_recipe = CreateRecipe.Field()
+    delete_recipe = DeleteRecipe.Field()
 
 
 class Query(graphene.ObjectType):
-    category = graphene.Field(CategoryType, name=graphene.String(), id=graphene.String())
-    all_categories = graphene.List(CategoryType)
+    category = graphene.relay.Node.Field(CategoryType)
+    categories = DjangoFilterConnectionField(CategoryType, filterset_class=CategoryFilter)
 
-    ingredient = graphene.Field(IngredientType, name=graphene.String(), id=graphene.String())
-    all_ingredients = graphene.List(IngredientType)
+    ingredient = graphene.relay.Node.Field(IngredientType)
+    ingredients = DjangoFilterConnectionField(IngredientType, filterset_class=IngredientFilter)
 
-    recipe = graphene.Field(RecipeType, name=graphene.String(), id=graphene.String())
-    all_recipes = graphene.List(RecipeType)
+    recipe = graphene.relay.Node.Field(RecipeType)
+    recipes = DjangoFilterConnectionField(RecipeType, filterset_class=RecipeFilter)
 
-    def resolve_category(self, info, **kwargs):
-        name = kwargs.get('name')
-        pk = kwargs.get('id')
-
-        if pk is not None:
-            return models.Category.objects.get(pk=pk)
-        if name is not None:
-            return models.Category.objects.get(name=name)
-        return None
-
-    def resolve_all_categories(self, info):
-        return models.Category.objects.all()
-
-    def resolve_ingredient(self, info, **kwargs):
-        name = kwargs.get('name')
-        pk = kwargs.get('id')
-
-        if pk is not None:
-            return models.Ingredient.objects.get(pk=pk)
-        if name is not None:
-            return models.Ingredient.objects.get(name=name)
-        return None
-
-    def resolve_all_ingredients(self, info):
-        return models.Ingredient.objects.all()
-
-    def resolve_recipe(self, info, **kwargs):
-        name = kwargs.get('name')
-        pk = kwargs.get('id')
-
-        if pk is not None:
-            return models.Recipe.objects.get(pk=pk)
-        if name is not None:
-            return models.Recipe.objects.get(name=name)
-        return None
-
-    def resolve_all_recipes(self, info):
-        return models.Recipe.objects.all()
