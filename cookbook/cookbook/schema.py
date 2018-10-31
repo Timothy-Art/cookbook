@@ -6,7 +6,7 @@ class Mutation(ingredients.schema.Mutation, graphene.ObjectType, ):
     pass
 
 
-class Query(ingredients.schema.Query, graphene.ObjectType,):
+class Query(ingredients.schema.Query, graphene.ObjectType, ):
     pass
 
 

@@ -13,12 +13,14 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from . import views
 from django.contrib import admin
 from django.urls import path
 from graphene_django.views import GraphQLView
 from cookbook.schema import schema
 
 urlpatterns = [
+    path('', views.index),
     path('admin/', admin.site.urls),
     path('graphql/', GraphQLView.as_view(graphiql=True, schema=schema)),
 ]
