@@ -5,10 +5,11 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "webpack --mode development ./cookbook/src/index.js --output ./cookbook/static/static.js",
+    "dev": "webpack --mode development ./cookbook/cookbook_ui/src/index.js --output ./cookbook/static/static.js",
     "dev-watch": "npm run dev -- --watch",
-    "build": "webpack --mode production ./cookbook/src/index.js --output ./cookbook/static/static.js",
-    "css-build": "node-sass --include-path node_modules/ ./cookbook/src/sass/index.scss ./cookbook/src/css/index.css",
+    "build": "webpack --mode production ./cookbook/cookbook_ui/src/index.js --output ./cookbook/static/static.js",
+    "relay": "relay-compiler --src ./cookbook/cookbook_ui/src/components --schema ./cookbook/cookbook_ui/schema.json --extensions js jsx --watch",
+    "css-build": "node-sass --include-path node_modules/ ./cookbook/cookbook_ui/src/sass/index.scss ./cookbook/cookbook_ui/src/css/index.css",
     "css-watch": "npm run css-build -- --watch"
   },
   "repository": {
@@ -30,20 +31,25 @@
     "react": "^16.5.2",
     "react-dom": "^16.5.2",
     "react-relay": "^1.7.0",
-    "react-spring": "^6.1.5"
+    "react-spring": "^6.1.5",
+    "relay-runtime": "^1.7.0"
   },
   "devDependencies": {
     "@fortawesome/fontawesome-pro": "^5.4.1",
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.5",
+    "babel-plugin-relay": "^1.7.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-preset-env": "^1.7.0",
     "babel-preset-es2016": "^6.24.1",
     "babel-preset-react": "^6.24.1",
     "bulma": "^0.7.2",
     "css-loader": "^1.0.0",
+    "graphql": "^14.0.2",
+    "i": "^0.3.6",
     "node-sass": "^4.9.4",
+    "relay-compiler": "^1.7.0",
     "style-loader": "^0.23.1",
     "webpack": "^4.20.2",
     "webpack-cli": "^3.1.2"

@@ -106,4 +106,4 @@ venv.bak/
 node_modules/
 cookbook/src/css/
 cookbook/static/
-
+__generated__/
