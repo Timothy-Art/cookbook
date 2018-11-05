@@ -28,7 +28,6 @@ const Ingredients = () => (
         environment={environment}
         query={ingredientsQuery}
         render={({ error, props }) => {
-            console.log(props);
             if (error){
                 console.log(error);
                 return <div>{error.message}</div>;
@@ -55,7 +54,7 @@ const Category = ({ node }) => (
     </div>
 );
 
-const Ingredient = ({ node }) => (
+export const Ingredient = ({ node }) => (
     <div>
         {node.name}
     </div>

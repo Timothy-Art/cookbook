@@ -60,9 +60,9 @@ class Cookbook extends PureComponent {
                 <div onClick={this.flip} style={{maxWidth: '95%', cursor: 'pointer'}}>
                     <FlipSwitch a={'Ingredients'} b={'Recipes'} flipped={this.state.active}/>
                 </div>
-                {this.state.flipped
-                    ? <Recipes />
-                    : <Ingredients />
+                {this.state.active
+                    ? <Ingredients />
+                    : <Recipes />
                 }
             </div>
         )
