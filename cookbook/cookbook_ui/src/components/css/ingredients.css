@@ -1,0 +1,9 @@
+.ingredient-flex {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.ingredient {
+    margin: 0 3px;
+    cursor: pointer;
+}

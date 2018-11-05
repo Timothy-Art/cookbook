@@ -38,7 +38,7 @@ class RecipeFilter(django_filters.FilterSet):
     class Meta:
         model = models.Recipe
         fields = {
-            'name': ['exact', 'istartswith', 'in'],
+            'name': ['exact', 'icontains'],
             'ingredients': ['exact'],
             'ingredients__name': ['exact', 'in'],
             'id': ['exact'],

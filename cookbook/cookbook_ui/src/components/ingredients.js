@@ -1,6 +1,9 @@
 import React from 'react';
 import { QueryRenderer, graphql } from 'react-relay';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import * as fas from '@fortawesome/free-solid-svg-icons';
 import environment from './environment';
+import './css/ingredients.css'
 
 const ingredientsQuery = graphql`
     query ingredientsQuery {
@@ -35,7 +38,7 @@ const Ingredients = () => (
                 return (
                     <div>
                         {props.categories.edges.map(({ node }) => <Category node={node} key={node.id}/>)}
-                        </div>
+                    </div>
                 );
             }
             return <div>Loading</div>;
@@ -47,17 +50,26 @@ const Category = ({ node }) => (
     <div>
         <hr/>
         <h3 className={'subtitle'}>{node.name}</h3>
-        <div>
-            {node.ingredients.edges.map(({ node }) => <Ingredient node={node} key={node.id} />)}
-        </div>
+        <IngredientFlex edges={node.ingredients.edges} />
         <hr/>
     </div>
 );
 
-export const Ingredient = ({ node }) => (
-    <div>
-        {node.name}
+export const IngredientFlex = ({ edges, onClick=()=>{}, icon=fas.faPlus }) => (
+    <div className={'ingredient-flex'}>
+        {edges.map(({ node }) => <Ingredient node={node} icon={icon} key={node.id} onClick={onClick} />)}
     </div>
+);
+
+export const Ingredient = ({ node, icon, onClick }) => (
+    <span className={'ingredient button'} onClick={() => onClick(node.id)}>
+        <span className={"icon"} style={{fontSize: '0.5rem'}}>
+            <FontAwesomeIcon icon={icon} style={{height: '0.6rem'}}/>
+        </span>
+        <span>
+            {node.name}
+        </span>
+    </span>
 );
 
 export default Ingredients;
