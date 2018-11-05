@@ -53,6 +53,7 @@ class Recipes extends PureComponent {
             tags: []
         };
         this.get_tags();
+        this.on_change = this.on_change.bind(this);
         this.add_filter = this.add_filter.bind(this);
         this.sub_filter = this.sub_filter.bind(this);
     }
@@ -67,8 +68,16 @@ class Recipes extends PureComponent {
             });
     }
 
-    add_filter(e){
+    on_change(e){
         let new_tag = this.state.tags.filter(({ node }) => node.id === e.currentTarget.value)[0];
+        console.log(new_tag);
+        if (new_tag.node.id !== ""){
+            this.setState({value: 0, filters: [...this.state.filters, new_tag]})
+        }
+    }
+
+    add_filter(id){
+        let new_tag = this.state.tags.filter(({ node }) => node.id === id)[0];
         console.log(new_tag);
         if (new_tag.node.id !== ""){
             this.setState({value: 0, filters: [...this.state.filters, new_tag]})
@@ -88,7 +97,7 @@ class Recipes extends PureComponent {
 
         return (
             <div>
-                <RecipeFilter {...this.state} onChange={this.add_filter} onClick={this.sub_filter} />
+                <RecipeFilter {...this.state} onChange={this.on_change} onClick={this.sub_filter} />
                 <QueryRenderer
                     environment={environment}
                     query={recipesQuery}
@@ -100,7 +109,7 @@ class Recipes extends PureComponent {
                         } else if (props){
                             return (
                                 <div>
-                                    {props.recipes.edges.map(({ node }) => <Recipe node={node} key={node.id}/>)}
+                                    {props.recipes.edges.map(({ node }) => <Recipe node={node} key={node.id} onClick={this.add_filter}/>)}
                                 </div>
                             );
                         }
@@ -114,28 +123,28 @@ class Recipes extends PureComponent {
 
 const RecipeFilter = ({ filters, tags, value, onChange, onClick }) => (
     <div>
-        <div className={'box no-padding'}>
+        <div className={'control select'} style={{marginBottom: '5px'}}>
+            <select onChange={onChange} value={value}>
+                {tags.map(({ node }) => <option key={node.id} value={node.id}>{node.name}</option>)}
+            </select>
+        </div>
+        <div className={'box'}>
             {filters.length === 0
                 ? <span className={'tag is-medium is-white has-text-grey-light'} >Tags</span>
                 : <IngredientFlex edges={filters} icon={fas.faTimes} onClick={onClick}/>
             }
         </div>
-        <div className={'select'}>
-            <select onChange={onChange} value={value}>
-                {tags.map(({ node }) => <option key={node.id} value={node.id}>{node.name}</option>)}
-            </select>
-        </div>
     </div>
 );
 
-const Recipe = ({ node }) => (
+const Recipe = ({ node, onClick }) => (
     <div>
         <hr/>
         <h3 className={'subtitle'}>{node.name}</h3>
         <div className={'content'}>
             <p>{node.instructions}</p>
         </div>
-        <IngredientFlex edges={node.ingredients.edges} />
+        <IngredientFlex edges={node.ingredients.edges} onClick={onClick} />
         <hr/>
     </div>
 );
