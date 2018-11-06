@@ -88,8 +88,7 @@ export class RecipeForm extends PureComponent{
 
         createRecipe(input)
             .then((response) => {
-                this.setState({error: ''});
-                this.props.deactivate();
+                this.reset();
             })
             .catch((error) => this.setState({error: error[0].message}));
     }
@@ -98,7 +97,8 @@ export class RecipeForm extends PureComponent{
         this.setState({
             name: '',
             instructions: '',
-            ingredients: []
+            ingredients: [],
+            error: ''
         });
         this.props.deactivate();
     }
