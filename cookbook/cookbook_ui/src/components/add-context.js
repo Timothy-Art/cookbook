@@ -2,6 +2,38 @@ import React, { PureComponent } from 'react';
 import { commitMutation, graphql } from 'react-relay';
 import './css/add-context.css';
 import {RecipeFilter} from "./recipes";
+import environment from "./environment";
+
+const recipeMutation = graphql`
+    mutation addContextRecipeMutation ($input: CreateRecipeInput!) {
+        createRecipe(input: $input){
+            recipe {
+                name
+            }
+        }
+    }    
+`;
+
+const createRecipe = (input) => {
+    return new Promise((resolve, reject) => {
+        let variables = {
+            input: input
+        };
+
+         commitMutation(
+            environment,
+            {
+                mutation: recipeMutation,
+                variables: variables,
+                onCompleted: (resp, err) => {
+                    if (err) return reject(err);
+                    return resolve(resp);
+                },
+                onError: err => reject(err)
+            }
+        );
+    });
+};
 
 export class RecipeForm extends PureComponent{
     constructor(props) {
@@ -48,7 +80,18 @@ export class RecipeForm extends PureComponent{
     }
 
     submit(){
+        let input = {
+            name: this.state.name,
+            instructions: this.state.instructions,
+            ingredients: this.state.ingredients.map(({ node }) => (node.name))
+        };
 
+        createRecipe(input)
+            .then((response) => {
+                this.setState({error: ''});
+                this.props.deactivate();
+            })
+            .catch((error) => this.setState({error: error[0].message}));
     }
 
     reset(){
@@ -57,7 +100,7 @@ export class RecipeForm extends PureComponent{
             instructions: '',
             ingredients: []
         });
-        this.props.deactivate()
+        this.props.deactivate();
     }
 
     render(){
@@ -93,7 +136,7 @@ export class RecipeForm extends PureComponent{
                 <a className={'button is-fullwidth is-primary'} onClick={this.submit}>Add</a>
                 <a className={'button is-fullwidth is-danger'} onClick={this.reset}>Cancel</a>
                 {this.state.error !== ''
-                    ? <div style={{color: "hsl(348, 100%, 61%)"}}>{this.state.error}</div>
+                    ? <div className={'span-full'} style={{color: "hsl(348, 100%, 61%)"}}>{this.state.error}</div>
                     : null
                 }
             </div>

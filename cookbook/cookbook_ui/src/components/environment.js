@@ -2,8 +2,6 @@ import { Environment, Network, RecordSource, Store } from 'relay-runtime';
 import { GRAPHQLBASE } from "../constants/urls";
 
 const fetchQuery = (operation, variables, cacheConfig, uploadables) => {
-    console.log(GRAPHQLBASE);
-
     return fetch(GRAPHQLBASE, {
         method: 'POST',
         headers: {
@@ -14,7 +12,6 @@ const fetchQuery = (operation, variables, cacheConfig, uploadables) => {
             variables
         })
     }).then(response => {
-        console.log(response);
         return response.json();
     });
 };

@@ -97,6 +97,9 @@ class CreateRecipe(graphene.relay.ClientIDMutation):
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
+        assert input['name'] != '', ValueError('Recipe name is invalid!')
+        assert input['instructions'] != '', ValueError('Recipe directions are not filled in!')
+
         recipe = models.Recipe(name=input['name'], instructions=input['instructions'])
         recipe.save()
 
