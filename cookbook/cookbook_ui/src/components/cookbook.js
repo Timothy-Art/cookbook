@@ -81,7 +81,7 @@ class Cookbook extends PureComponent {
                 return data.ingredients.edges;
             })
             .then(tags => {
-                this.setState({tags: [{node: {name: 'Filter Ingredients', id: ''}}, ...tags]});
+                this.setState({tags: tags});
             });
     }
 

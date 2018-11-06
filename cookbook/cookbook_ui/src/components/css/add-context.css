@@ -1,0 +1,53 @@
+.add-context-container {
+    z-index: 100;
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #232323f6;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.1s linear;
+}
+
+.add-context-container.active{
+    visibility: visible;
+    opacity: 1;
+}
+
+.add-context-container > .dialog {
+    position: relative;
+    max-height: 250px;
+    top: 50px;
+    margin: auto;
+    transform: scale(1.33, 1.33);
+    transition: transform 0.1s ease-out;
+}
+
+.add-context-container.active > .dialog {
+    transform: scale(1, 1);
+}
+
+.dialog > .dialog-grid{
+    width: 95%;
+}
+
+.dialog-grid {
+    margin: auto;
+    width: 100%;
+    max-width: 450px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 1em;
+}
+
+.span-full {
+    grid-column: span 2;
+}
+
+@media (min-width: 769px) {
+    .grid-dialog {
+        grid-template-columns: repeat(2, minmax(200px, 1fr));
+    }
+}

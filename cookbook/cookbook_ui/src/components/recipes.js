@@ -3,6 +3,7 @@ import { QueryRenderer, graphql } from 'react-relay';
 import * as fas from '@fortawesome/free-solid-svg-icons';
 import environment from './environment';
 import { IngredientFlex } from "./ingredients";
+import AddContext, {RecipeForm} from "./add-context";
 
 const recipesQuery = graphql`
     query recipesQuery ($ingredients: [ID], $cursor: String) {
@@ -51,9 +52,15 @@ class Recipes extends PureComponent {
 
         return (
             <div>
+                <AddContext>
+                    <RecipeForm
+                        tags={this.props.tags}
+                    />
+                </AddContext>
+                <br/>
                 <RecipeFilter
                     filters={this.props.filters}
-                    tags={this.props.tags}
+                    tags={[{node: {name: 'Filter Ingredients', id: ''}}, ...this.props.tags]}
                     value={this.state.value}
                     onChange={this.on_change}
                     onClick={this.props.sub_filter}
@@ -83,23 +90,23 @@ class Recipes extends PureComponent {
     }
 }
 
-const RecipeFilter = ({ filters, tags, value, onChange, onClick }) => (
+export const RecipeFilter = ({ filters, tags, value, onChange, onClick }) => (
     <div>
-        <div className={'control select'} style={{marginBottom: '5px'}}>
-            <select onChange={onChange} value={value}>
-                {tags.map(({ node }) => <option key={node.id} value={node.id}>{node.name}</option>)}
-            </select>
-        </div>
         <div className={'box'}>
+            <div className={'control select'} style={{margin: '3px'}}>
+                <select onChange={onChange} value={value}>
+                    {tags.map(({ node }) => <option key={node.id} value={node.id}>{node.name}</option>)}
+                </select>
+            </div>
             {filters.length === 0
-                ? <span className={'tag is-medium is-white has-text-grey-light'} >Tags</span>
+                ? null
                 : <IngredientFlex edges={filters} icon={fas.faTimes} onClick={onClick}/>
             }
         </div>
     </div>
 );
 
-const Recipe = ({ node, onClick }) => (
+export const Recipe = ({ node, onClick }) => (
     <div>
         <hr/>
         <h3 className={'subtitle'}>{node.name}</h3>

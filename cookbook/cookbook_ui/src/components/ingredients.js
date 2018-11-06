@@ -48,7 +48,7 @@ const Ingredients = ({ add_filter }) => (
     />
 );
 
-const Category = ({ node, onClick }) => (
+export const Category = ({ node, onClick }) => (
     <div>
         <hr/>
         <h3 className={'subtitle'}>{node.name}</h3>

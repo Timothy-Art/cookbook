@@ -1,9 +1,9 @@
 .ingredient-flex {
-    display: flex;
+    display: inline-flex;
     flex-wrap: wrap;
 }
 
 .ingredient {
-    margin: 0 3px;
+    margin: 3px;
     cursor: pointer;
 }
