@@ -99,8 +99,14 @@ class CreateRecipe(graphene.relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, **input):
         recipe = models.Recipe(name=input['name'], instructions=input['instructions'])
         recipe.save()
+
         for ingredient in input['ingredients']:
-            recipe.ingredients.add(models.Ingredient.objects.get(name=ingredient))
+            try:
+                i = models.Ingredient.objects.get(name=ingredient)
+                recipe.ingredients.add(i)
+            except models.Ingredient.DoesNotExist:
+                recipe.delete()
+                raise Exception('Selected Ingredient does not exist!')
 
         return CreateRecipe(recipe=recipe)
 
