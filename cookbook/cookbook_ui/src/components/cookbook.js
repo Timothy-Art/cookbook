@@ -1,13 +1,28 @@
 import React, { PureComponent } from 'react';
+import { graphql, fetchQuery } from 'react-relay';
 import Recipes from './recipes';
 import Ingredients from './ingredients';
 import { Spring } from 'react-spring';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import * as fas from '@fortawesome/free-solid-svg-icons';
 import './css/cookbook.css';
+import environment from "./environment";
+
+const ingredientsQuery = graphql`
+    query cookbookIngredientsQuery {
+        ingredients {
+            edges {
+                node {
+                    name
+                    id
+                }
+            }
+        }
+    }
+`;
 
 export const Flipper = ({ a, b, flipped, config={} }) => {
-    let x = flipped ? '0%' : '50%';
+    let x = flipped ? '0%' : '100%';
     let opacity = flipped ? 1 : 0;
     let opacity_inv = 1 - opacity;
 
@@ -48,18 +63,49 @@ class Cookbook extends PureComponent {
         super(props);
 
         this.state = {
-            active: true
+            active: true,
+            tags: [],
+            filters: []
         };
 
+        this.get_tags();
+
         this.flip = this.flip.bind(this);
+        this.add_filter = this.add_filter.bind(this);
+        this.sub_filter = this.sub_filter.bind(this);
+    }
+
+    get_tags(){
+        fetchQuery(environment, ingredientsQuery)
+            .then(data => {
+                return data.ingredients.edges;
+            })
+            .then(tags => {
+                this.setState({tags: [{node: {name: 'Filter Ingredients', id: ''}}, ...tags]});
+            });
     }
 
     flip(){
         this.setState({active: !this.state.active});
     }
 
+    add_filter(id){
+        let new_tag = this.state.tags.filter(({ node }) => node.id === id)[0];
+        console.log(new_tag);
+        if (new_tag.node.id !== ""){
+            if (this.state.filters.find(({ node }) => node.id === id) === undefined){
+                this.setState({value: 0, filters: [...this.state.filters, new_tag]});
+            }
+        }
+    }
+
+    sub_filter(id){
+        let tags = this.state.filters.filter(({ node }) => node.id !== id);
+
+        this.setState({filters: tags});
+    }
+
     render(){
-        console.log(this.state);
         return(
             <div>
                 <div style={{maxWidth: '95%'}}>
@@ -85,8 +131,15 @@ class Cookbook extends PureComponent {
                 </div>
                 <div>
                     <Flipper
-                        a={<Ingredients />}
-                        b={<Recipes />}
+                        a={<Ingredients
+                            add_filter={this.add_filter}
+                        />}
+                        b={<Recipes
+                            filters={this.state.filters}
+                            tags={this.state.tags}
+                            add_filter={this.add_filter}
+                            sub_filter={this.sub_filter}
+                        />}
                         flipped={this.state.active}
                         config={{delay: 100}}
                     />

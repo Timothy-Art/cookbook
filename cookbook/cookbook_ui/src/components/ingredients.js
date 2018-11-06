@@ -26,7 +26,7 @@ const ingredientsQuery = graphql`
     }
 `;
 
-const Ingredients = () => (
+const Ingredients = ({ add_filter }) => (
     <QueryRenderer
         environment={environment}
         query={ingredientsQuery}
@@ -37,7 +37,9 @@ const Ingredients = () => (
             } else if (props){
                 return (
                     <div>
-                        {props.categories.edges.map(({ node }) => <Category node={node} key={node.id}/>)}
+                        {props.categories.edges.map(({ node }) =>
+                            <Category node={node} key={node.id} onClick={add_filter}/>
+                        )}
                     </div>
                 );
             }
@@ -46,11 +48,11 @@ const Ingredients = () => (
     />
 );
 
-const Category = ({ node }) => (
+const Category = ({ node, onClick }) => (
     <div>
         <hr/>
         <h3 className={'subtitle'}>{node.name}</h3>
-        <IngredientFlex edges={node.ingredients.edges} />
+        <IngredientFlex edges={node.ingredients.edges} onClick={onClick} />
         <hr/>
     </div>
 );

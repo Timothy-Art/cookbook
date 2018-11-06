@@ -1,5 +1,5 @@
 import React, { PureComponent } from  'react';
-import { QueryRenderer, graphql, fetchQuery } from 'react-relay';
+import { QueryRenderer, graphql } from 'react-relay';
 import * as fas from '@fortawesome/free-solid-svg-icons';
 import environment from './environment';
 import { IngredientFlex } from "./ingredients";
@@ -30,74 +30,34 @@ const recipesQuery = graphql`
     }
 `;
 
-const ingredientsQuery = graphql`
-    query recipesIngredientQuery {
-        ingredients {
-            edges {
-                node {
-                    name
-                    id
-                }
-            }
-        }
-    }
-`;
-
 class Recipes extends PureComponent {
     constructor(props){
         super(props);
 
         this.state = {
-            value: 0,
-            filters: [],
-            tags: []
+            value: 0
         };
-        this.get_tags();
         this.on_change = this.on_change.bind(this);
-        this.add_filter = this.add_filter.bind(this);
-        this.sub_filter = this.sub_filter.bind(this);
     }
 
-    get_tags(){
-        fetchQuery(environment, ingredientsQuery)
-            .then(data => {
-                return data.ingredients.edges;
-            })
-            .then(tags => {
-                this.setState({tags: [{node: {name: 'Filter Ingredients', id: ''}}, ...tags]});
-            });
-    }
 
     on_change(e){
-        let new_tag = this.state.tags.filter(({ node }) => node.id === e.currentTarget.value)[0];
-        console.log(new_tag);
-        if (new_tag.node.id !== ""){
-            this.setState({value: 0, filters: [...this.state.filters, new_tag]})
-        }
-    }
-
-    add_filter(id){
-        let new_tag = this.state.tags.filter(({ node }) => node.id === id)[0];
-        console.log(new_tag);
-        if (new_tag.node.id !== ""){
-            this.setState({value: 0, filters: [...this.state.filters, new_tag]})
-        }
-    }
-
-    sub_filter(id){
-        let tags = this.state.filters.filter(({ node }) => node.id !== id);
-
-        this.setState({filters: tags});
+        this.props.add_filter(e.currentTarget.value);
+        this.setState({value: 0});
     }
 
     render(){
-        console.log(this.state);
-        let vars = {ingredients: this.state.filters.map(({ node }) => node.id)};
-        console.log(vars);
+        let vars = {ingredients: this.props.filters.map(({ node }) => node.id)};
 
         return (
             <div>
-                <RecipeFilter {...this.state} onChange={this.on_change} onClick={this.sub_filter} />
+                <RecipeFilter
+                    filters={this.props.filters}
+                    tags={this.props.tags}
+                    value={this.state.value}
+                    onChange={this.on_change}
+                    onClick={this.props.sub_filter}
+                />
                 <QueryRenderer
                     environment={environment}
                     query={recipesQuery}
@@ -109,7 +69,9 @@ class Recipes extends PureComponent {
                         } else if (props){
                             return (
                                 <div>
-                                    {props.recipes.edges.map(({ node }) => <Recipe node={node} key={node.id} onClick={this.add_filter}/>)}
+                                    {props.recipes.edges.map(({ node }) =>
+                                        <Recipe node={node} key={node.id} onClick={this.props.add_filter}/>
+                                    )}
                                 </div>
                             );
                         }
