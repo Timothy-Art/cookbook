@@ -14,7 +14,18 @@ const recipeMutation = graphql`
     }    
 `;
 
-const createRecipe = (input) => {
+const ingredientMutation = graphql`
+    mutation addContextIngredientMutation ($input: CreateIngredientInput!) {
+        createIngredient(input: $input){
+            ingredient {
+                name
+            }
+        }
+    }
+`;
+
+
+const createRecipe = input => {
     return new Promise((resolve, reject) => {
         let variables = {
             input: input
@@ -24,6 +35,27 @@ const createRecipe = (input) => {
             environment,
             {
                 mutation: recipeMutation,
+                variables: variables,
+                onCompleted: (resp, err) => {
+                    if (err) return reject(err);
+                    return resolve(resp);
+                },
+                onError: err => reject(err)
+            }
+        );
+    });
+};
+
+const createIngredient = input => {
+    return new Promise((resolve, reject) => {
+        let variables = {
+            input: input
+        };
+
+        commitMutation(
+            environment,
+            {
+                mutation: ingredientMutation,
                 variables: variables,
                 onCompleted: (resp, err) => {
                     if (err) return reject(err);
@@ -144,6 +176,86 @@ export class RecipeForm extends PureComponent{
     }
 }
 
+export class IngredientForm extends PureComponent{
+    constructor(props){
+        super(props);
+        console.log(props);
+        this.state = {
+            name: '',
+            category: 0,
+            error: ''
+        };
+
+        this.set_name = this.set_name.bind(this);
+        this.set_category = this.set_category.bind(this);
+        this.submit = this.submit.bind(this);
+        this.reset = this.reset.bind(this);
+    }
+
+    set_name(e){
+        this.setState({name: e.currentTarget.value});
+    }
+
+    set_category(e){
+        this.setState({category: e.currentTarget.value});
+    }
+
+    submit(){
+        let input = {
+            name: this.state.name,
+            category: this.props.categories[this.state.category].node.name
+        };
+        console.log(input);
+
+        createIngredient(input)
+            .then((response) => {
+                this.reset();
+            })
+            .catch((error) => this.setState({error: error[0].message}));
+    }
+
+    reset(){
+        this.setState({
+            name: '',
+            category: 0,
+            error: ''
+        });
+        this.props.deactivate();
+    }
+
+    render(){
+        return <div className={'dialog'}>
+            <div className={'dialog-grid'}>
+                <div className={'control is-expanded span-full'}>
+                    <input
+                        type={'text'}
+                        className={'input'}
+                        value={this.state.name}
+                        onChange={this.set_name}
+                        placeholder={'Name'}
+                    />
+                </div>
+                <div className={'control is-expanded span-full'}>
+                    <div className={'select is-fullwidth'}>
+                        <select onChange={this.set_category} value={this.state.category}>
+                            {this.props.categories.map(({ node }, index) =>
+                                <option key={node.id} value={index}>{node.name}</option>
+                            )}
+                        </select>
+                    </div>
+                </div>
+
+                <a className={'button is-fullwidth is-primary'} onClick={this.submit}>Add</a>
+                <a className={'button is-fullwidth is-danger'} onClick={this.reset}>Cancel</a>
+                {this.state.error !== ''
+                    ? <div className={'span-full'} style={{color: "hsl(348, 100%, 61%)"}}>{this.state.error}</div>
+                    : null
+                }
+            </div>
+        </div>
+    }
+}
+
 class AddContext extends PureComponent{
     constructor(props) {
         super(props);
@@ -171,7 +283,7 @@ class AddContext extends PureComponent{
         );
 
         return <div>
-            <a className={'button is-primary'} onClick={this.activate}>Add Recipe</a>
+            <a className={'button is-primary'} onClick={this.activate}>{this.props.title}</a>
             <div className={this.state.active ? 'add-context-container active' : 'add-context-container'}>
                 {children}
             </div>

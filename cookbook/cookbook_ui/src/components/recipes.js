@@ -52,7 +52,7 @@ class Recipes extends PureComponent {
 
         return (
             <div>
-                <AddContext>
+                <AddContext title={'Add Recipe'}>
                     <RecipeForm
                         tags={this.props.tags}
                     />

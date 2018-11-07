@@ -9,8 +9,16 @@ import './css/cookbook.css';
 import environment from "./environment";
 
 const ingredientsQuery = graphql`
-    query cookbookIngredientsQuery {
+    query cookbookTagsQuery {
         ingredients {
+            edges {
+                node {
+                    name
+                    id
+                }
+            }
+        }
+        categories {
             edges {
                 node {
                     name
@@ -64,6 +72,7 @@ class Cookbook extends PureComponent {
 
         this.state = {
             active: true,
+            categories: [],
             tags: [],
             filters: []
         };
@@ -75,13 +84,12 @@ class Cookbook extends PureComponent {
         this.sub_filter = this.sub_filter.bind(this);
     }
 
-    get_tags(){
+    get_tags() {
+        console.log('getting tags');
         fetchQuery(environment, ingredientsQuery)
             .then(data => {
-                return data.ingredients.edges;
-            })
-            .then(tags => {
-                this.setState({tags: tags});
+                console.log(data);
+                this.setState({tags: data.ingredients.edges, categories: data.categories.edges});
             });
     }
 
@@ -133,6 +141,7 @@ class Cookbook extends PureComponent {
                     <Flipper
                         a={<Ingredients
                             add_filter={this.add_filter}
+                            categories={this.state.categories}
                         />}
                         b={<Recipes
                             filters={this.state.filters}

@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import * as fas from '@fortawesome/free-solid-svg-icons';
 import environment from './environment';
 import './css/ingredients.css'
+import AddContext, { IngredientForm } from "./add-context";
 
 const ingredientsQuery = graphql`
     query ingredientsQuery {
@@ -26,26 +27,34 @@ const ingredientsQuery = graphql`
     }
 `;
 
-const Ingredients = ({ add_filter }) => (
-    <QueryRenderer
-        environment={environment}
-        query={ingredientsQuery}
-        render={({ error, props }) => {
-            if (error){
-                console.log(error);
-                return <div>{error.message}</div>;
-            } else if (props){
-                return (
-                    <div>
-                        {props.categories.edges.map(({ node }) =>
-                            <Category node={node} key={node.id} onClick={add_filter}/>
-                        )}
-                    </div>
-                );
-            }
-            return <div>Loading</div>;
-        }}
-    />
+const Ingredients = ({ add_filter, categories }) => (
+    <div>
+        <AddContext title={'Add Ingredient'}>
+            <IngredientForm
+                categories={categories}
+            />
+        </AddContext>
+        <br/>
+        <QueryRenderer
+            environment={environment}
+            query={ingredientsQuery}
+            render={({ error, props }) => {
+                if (error){
+                    console.log(error);
+                    return <div>{error.message}</div>;
+                } else if (props){
+                    return (
+                        <div>
+                            {props.categories.edges.map(({ node }) =>
+                                <Category node={node} key={node.id} onClick={add_filter}/>
+                            )}
+                        </div>
+                    );
+                }
+                return <div>Loading</div>;
+            }}
+        />
+    </div>
 );
 
 export const Category = ({ node, onClick }) => (

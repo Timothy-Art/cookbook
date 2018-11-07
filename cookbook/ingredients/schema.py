@@ -1,5 +1,6 @@
 import django_filters
 import graphene
+import django.db
 
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -61,14 +62,18 @@ class CreateIngredient(graphene.relay.ClientIDMutation):
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
+        assert input['name'] != '', ValueError('Name cannot be blank!')
         notes = input.get('notes')
 
-        ingredient = models.Ingredient(
-            name=input['name'],
-            category=models.Category.objects.get(name=input['category']),
-            notes=notes
-        )
-        ingredient.save()
+        try:
+            ingredient = models.Ingredient(
+                name=input['name'],
+                category=models.Category.objects.get(name=input['category']),
+                notes=notes
+            )
+            ingredient.save()
+        except django.db.IntegrityError:
+            raise ValueError('Ingredient already exists!')
 
         return CreateIngredient(ingredient=ingredient)
 
@@ -97,7 +102,7 @@ class CreateRecipe(graphene.relay.ClientIDMutation):
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
-        assert input['name'] != '', ValueError('Recipe name is invalid!')
+        assert input['name'] != '', ValueError('Name cannot be blank!')
         assert input['instructions'] != '', ValueError('Recipe directions are not filled in!')
 
         recipe = models.Recipe(name=input['name'], instructions=input['instructions'])
