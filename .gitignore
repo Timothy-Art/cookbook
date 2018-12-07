@@ -104,6 +104,6 @@ venv.bak/
 .mypy_cache/
 .idea/
 node_modules/
-cookbook/src/css/
+cookbook/cookbook_ui/src/css/
 cookbook/static/
 __generated__/
