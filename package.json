@@ -47,7 +47,7 @@
     "css-loader": "^1.0.0",
     "graphql": "^14.0.2",
     "i": "^0.3.6",
-    "node-sass": "^4.9.4",
+    "node-sass": "^4.13.1",
     "relay-compiler": "^1.7.0",
     "style-loader": "^0.23.1",
     "webpack": "^4.20.2",
